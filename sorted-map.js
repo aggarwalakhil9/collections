@@ -9,7 +9,7 @@ var MapChanges = require("./listen/map-changes");
 
 module.exports = SortedMap;
 
-function SortedMap(values, equals, compare, getDefault) {
+function SortedMap(values, equals, compare, getDefault, direction) {
     if (!(this instanceof SortedMap)) {
         return new SortedMap(values, equals, compare, getDefault);
     }
@@ -19,13 +19,17 @@ function SortedMap(values, equals, compare, getDefault) {
     this.contentEquals = equals;
     this.contentCompare = compare;
     this.getDefault = getDefault;
+    this.direction = direction || 1;
     this.store = new SortedSet(
         null,
         function keysEqual(a, b) {
             return equals(a.key, b.key);
         },
         function compareKeys(a, b) {
-            return compare(a.key, b.key);
+            if(direction == -1){
+                return compare(parseFloat(b.key), parseFloat(a.key));
+            }
+            return compare(parseFloat(a.key), parseFloat(b.key));
         }
     );
     this.length = 0;
@@ -48,7 +52,8 @@ SortedMap.prototype.constructClone = function (values) {
         values,
         this.contentEquals,
         this.contentCompare,
-        this.getDefault
+        this.getDefault,
+        this.direction
     );
 };
 SortedMap.prototype.iterate = function () {
